@@ -1,4 +1,4 @@
-"""Package containing your_project name."""
+"""Package containing Coargus's utility functions."""
 
 from __future__ import annotations
 
