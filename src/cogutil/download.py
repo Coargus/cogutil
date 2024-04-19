@@ -1,15 +1,85 @@
 """Coargus's Download utilities."""
 
+from __future__ import annotations
+
 import logging
+import shutil  # Needed for directory removal
 import subprocess
 from pathlib import Path
 
 import gdown
+import wget
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
+
+
+def coargus_downloader(
+    url: str,
+    model_dir: str,
+    file_name: str | None = None,
+    overwrite: bool = False,
+) -> bool | Path:
+    """Download a file from a URL using wget and save it to a specified path.
+
+    Parameters:
+    url (str): The URL of the file to download.
+    destination_path (str): The path and filename where the file will be saved.
+
+    Returns:
+    bool: True if the download was successful, False otherwise.
+    """
+    model_path = coargus_cache_dir() / model_dir
+    if overwrite:
+        shutil.rmtree(model_path)
+
+    model_path.parent.mkdir(parents=True, exist_ok=True)
+    if file_name:
+        destination_path = model_path / file_name
+    else:
+        destination_path = model_path / url.split("/")[-1]
+
+    # Check if the file at destination_path exists
+    if destination_path.exists():
+        logging.info("Model already exists: %s", str(model_path))
+        return False
+
+    wget_downloader(url=url, destination_path=destination_path)
+    logging.info("Model downloaded successfully: %s", model_path)
+
+    return Path(destination_path)
+
+
+def coargus_cache_dir() -> Path:
+    """Get the path to the Coargus cache directory.
+
+    Returns:
+    Path: The path to the Coargus cache directory.
+    """
+    return Path.home() / ".cache/coargus"
+
+
+def wget_downloader(url: str, destination_path: str) -> bool:
+    """Downloads a file from a URL using wget and saves it to a specified path.
+
+    Parameters:
+    url (str): The URL of the file to download.
+    destination_path (str): The path and filename where the file will be saved.
+
+    Returns:
+    bool: True if the download was successful, False otherwise.
+    """
+    try:
+        wget.download(url, destination_path)
+
+    except Exception:
+        shutil.rmtree(destination_path)
+        logging.exception("Unexpected error occurred.")
+        return False
+
+    return True
 
 
 def download_file_from_google_drive(

@@ -3,16 +3,16 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "package_name"
+name = "cogutil"
 version = "0.0.1"
-description = "A package description"
+description = "cogutil"
 authors = [{ name = "Minkyu Choi", email = "minkyu.choi@coargus.com" }]
 license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
     "gdown",
-    "torch",
+    "wget",
     "omegaconf"
 
 ]
