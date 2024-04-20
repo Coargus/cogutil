@@ -21,7 +21,7 @@ def coargus_downloader(
     model_dir: str,
     file_name: str | None = None,
     overwrite: bool = False,
-) -> bool | Path:
+) -> Path:
     """Download a file from a URL using wget and save it to a specified path.
 
     Parameters:
@@ -44,10 +44,10 @@ def coargus_downloader(
     # Check if the file at destination_path exists
     if destination_path.exists():
         logging.info("Model already exists: %s", str(model_path))
-        return False
+        return Path(destination_path)
 
-    wget_downloader(url=url, destination_path=destination_path)
-    logging.info("Model downloaded successfully: %s", model_path)
+    wget_downloader(url=url, destination_path=str(destination_path))
+    logging.info("A model downloaded successfully: %s", model_path)
 
     return Path(destination_path)
 
@@ -71,11 +71,18 @@ def wget_downloader(url: str, destination_path: str) -> bool:
     Returns:
     bool: True if the download was successful, False otherwise.
     """
+    assert isinstance(  # noqa: S101
+        destination_path, str
+    ), "destination_path must be a string."
     try:
         wget.download(url, destination_path)
 
+    except FileNotFoundError:
+        pass
+
     except Exception:
-        shutil.rmtree(destination_path)
+        if Path(destination_path).exists():
+            shutil.rmtree(destination_path)
         logging.exception("Unexpected error occurred.")
         return False
 
